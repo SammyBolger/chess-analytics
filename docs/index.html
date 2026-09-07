@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BizareChess chess analytics</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+  h1 { margin-bottom: 0.25rem; }
+  .subtitle { color: #666; margin-top: 0; }
+  .stats { display: flex; gap: 2rem; padding: 1rem 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+  .stat { font-size: 0.9rem; color: #555; }
+  .stat b { display: block; font-size: 1.5rem; color: #111; }
+  img { max-width: 100%; margin: 1.5rem 0; border: 1px solid #eee; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; margin: 1rem 0; }
+  th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid #eee; }
+  th { background: #fafafa; }
+  footer { color: #888; font-size: 0.8rem; margin-top: 3rem; }
+</style>
+</head>
+<body>
+
+<h1>BizareChess</h1>
+<p class="subtitle">chess.com analytics, auto-generated from my own games</p>
+
+<div class="stats">
+  <div class="stat"><b>39</b>games played</div>
+  <div class="stat"><b>12</b>wins</div>
+  <div class="stat"><b>23</b>losses</div>
+  <div class="stat"><b>35.9%</b>score</div>
+</div>
+
+<h2>By color</h2>
+<ul><li>black: 21 games, 38.1%</li><li>white: 18 games, 33.3%</li></ul>
+
+<h2>Rating over time</h2>
+<img src="rating_trend.png" alt="rating trend">
+
+<h2>Score by opening</h2>
+<img src="openings.png" alt="score by opening">
+
+<h2>Top openings (2+ games)</h2>
+<table>
+<tr><th>opening</th><th>games</th><th>score</th></tr>
+<tr><td>Four Knights Game</td><td>4</td><td>25.0%</td></tr>
+<tr><td>Italian Game Two Knights Modern Bishops Opening</td><td>4</td><td>0.0%</td></tr>
+<tr><td>Van t Kruijs Opening 1...e5</td><td>3</td><td>66.7%</td></tr>
+<tr><td>Vienna Game</td><td>3</td><td>33.3%</td></tr>
+<tr><td>Kings Pawn Opening Kings Knight Variation 2...Nc6</td><td>2</td><td>100.0%</td></tr>
+<tr><td>Scandinavian Defense Closed 2...dxe4 3.Nxe4</td><td>2</td><td>25.0%</td></tr>
+<tr><td>Four Knights Game Italian Variation</td><td>2</td><td>0.0%</td></tr>
+<tr><td>Three Knights Opening 3...Bc5</td><td>2</td><td>0.0%</td></tr>
+</table>
+
+<h2>Recent games</h2>
+<table>
+<tr><th>date</th><th>color</th><th>opponent</th><th>result</th><th>opening</th></tr>
+<tr><td>2026-09-07</td><td>black</td><td>ilTalpone (819)</td><td>checkmated</td><td>Queens Gambit Accepted 3.Nf3 Nf6 4.e3 e6 5.Bxc4</td></tr>
+<tr><td>2026-09-07</td><td>black</td><td>Riya_Sarda27 (893)</td><td>resigned</td><td>Four Knights Game</td></tr>
+<tr><td>2026-09-07</td><td>white</td><td>sukaaamachaaa (850)</td><td>checkmated</td><td>Three Knights Opening 3...Bc5</td></tr>
+<tr><td>2026-09-07</td><td>white</td><td>loaiAA (870)</td><td>checkmated</td><td>Four Knights Game</td></tr>
+<tr><td>2026-09-07</td><td>white</td><td>depsssssssss (864)</td><td>win</td><td>Petrovs Defense Three Knights Game</td></tr>
+<tr><td>2026-09-06</td><td>black</td><td>AntonioFrazier (757)</td><td>win</td><td>Van t Kruijs Opening 1...e5</td></tr>
+<tr><td>2026-09-06</td><td>white</td><td>AHHAHAHAXDDD (841)</td><td>win</td><td>Scandinavian Defense 2.e5 c5</td></tr>
+<tr><td>2026-09-06</td><td>black</td><td>rushikesh-theKvoth (811)</td><td>win</td><td>Kings Pawn Opening Kings Knight Variation 2...Nc6</td></tr>
+<tr><td>2026-09-06</td><td>black</td><td>aleques20 (773)</td><td>resigned</td><td>Undefined</td></tr>
+<tr><td>2026-09-06</td><td>white</td><td>lepionedebene (893)</td><td>resigned</td><td>Vienna Game</td></tr>
+</table>
+
+<footer>
+Data pulled from the chess.com public API. Last updated 2026-09-07.
+Source: <a href="https://github.com/SammyBolger/chess-analytics">github.com/SammyBolger/chess-analytics</a>
+</footer>
+
+</body>
+</html>

@@ -1,64 +1,110 @@
 # chess-analytics
 
-A small end-to-end data pipeline over my own chess.com game history.
+*A tiny ELT pipeline that pulls my chess.com games, loads them into DuckDB, and publishes a dashboard.*
 
-I made this because I wanted a repeatable way to look at my openings and
-results without clicking through the site. It pulls every game I've played,
-loads it into DuckDB, and generates a few charts.
+[![Live report](https://img.shields.io/badge/live-report-blue)](https://sammybolger.github.io/chess-analytics/)
+[![License](https://img.shields.io/github/license/SammyBolger/chess-analytics)](LICENSE)
 
-## What it does
+I wanted a repeatable way to look at my openings and results without clicking through chess.com. This project pulls every game I've played, loads it into DuckDB, and writes an HTML dashboard that GitHub Pages serves.
+
+**Live report:** https://sammybolger.github.io/chess-analytics/
+
+## Overview
+
+An end-to-end ELT job in three scripts. Ingest hits the chess.com public API, transform parses PGNs into a clean typed table, and analyze runs the queries and writes the report.
+
+## Features
+
+- Pulls every monthly archive for a chess.com username with no auth needed
+- Parses PGN with `python-chess` to extract opening, termination, and move count
+- Keeps a `raw_games` table alongside the flat `games` table so the transform step is idempotent
+- Generates a static HTML dashboard for GitHub Pages
+
+## Demo
+
+![dashboard preview](docs/rating_trend.png)
+
+Live at https://sammybolger.github.io/chess-analytics/
+
+## Tech Stack
+
+- **Python 3.11** — one runtime for all three steps
+- **DuckDB** — single-file columnar store, no server. Fits a personal dataset without any Postgres overhead
+- **python-chess** — parses PGN reliably. Move count and termination live inside the PGN body, not the JSON metadata
+- **matplotlib** — static chart rendering. PNGs go straight into `docs/` for GitHub Pages
+- **requests** — chess.com public API client, one endpoint per month
+
+## Architecture
+
+```mermaid
+flowchart LR
+  API[chess.com API] --> Ingest[ingest.py]
+  Ingest --> Raw[(data/raw/*.json)]
+  Raw --> Transform[transform.py]
+  Transform --> DB[(DuckDB<br/>raw_games + games)]
+  DB --> Analyze[analyze.py]
+  Analyze --> Docs[docs/index.html + charts]
+  Docs --> Pages[GitHub Pages]
+```
+
+Ingest saves each month as a JSON file so transform can be re-run without hitting the API. Transform builds two tables: `raw_games` keeps the original JSON per game, `games` is the flat, typed table analysis reads from. Analyze runs the queries, saves chart PNGs, and writes `docs/index.html`.
+
+## Project Structure
 
 ```
-chess.com API   ->   raw JSON files   ->   DuckDB (raw + flat tables)   ->   charts
-   ingest.py           data/raw/                data/chess.duckdb            charts/
+chess-analytics/
+├── ingest.py          # fetch monthly archives from chess.com
+├── transform.py       # parse PGN, load DuckDB (raw + flat)
+├── analyze.py         # queries, charts, HTML report
+├── requirements.txt
+├── data/              # raw JSON + DuckDB file (gitignored)
+└── docs/              # HTML report + charts (served by GH Pages)
 ```
 
-1. `ingest.py` hits the public chess.com API and saves each monthly archive
-   as a JSON file. No auth needed. Rate limited politely.
-2. `transform.py` parses each PGN with `python-chess`, extracts the fields I
-   actually care about (color, result, opening, rating, accuracies, move
-   count) and loads two DuckDB tables:
-   - `raw_games` keeps the original JSON payload per game so I can go back
-     for a field I forgot
-   - `games` is the flat, typed table for analysis
-3. `analyze.py` runs the queries and drops PNG charts into `charts/`.
+## Installation & Setup
 
-## Setup
+**Prerequisites**
+- Python 3.11+
 
+**Local setup**
 ```bash
+git clone https://github.com/SammyBolger/chess-analytics.git
+cd chess-analytics
 pip install -r requirements.txt
-python ingest.py
-python transform.py
-python analyze.py
+
+python ingest.py       # writes data/raw/*.json
+python transform.py    # writes data/chess.duckdb
+python analyze.py      # writes docs/index.html and PNGs
 ```
 
-The database file (`data/chess.duckdb`) and raw JSON are gitignored so the
-repo stays small. Running the three scripts in order rebuilds everything.
+Change the `USERNAME` constant at the top of `ingest.py`, `transform.py`, and `analyze.py` to point at a different chess.com account.
 
-## What I look at
+## Usage
 
-- overall record and score percentage
-- score % by color (white vs black)
-- most-played openings and how I do in each
-- rating trend across time controls
+Open `docs/index.html` in a browser, or view the hosted version at https://sammybolger.github.io/chess-analytics/.
 
-![rating over time](charts/rating_trend.png)
-![score by opening](charts/openings.png)
+Ad-hoc SQL against the DuckDB file:
+```bash
+python -c "import duckdb; print(duckdb.connect('data/chess.duckdb', read_only=True).execute('SELECT opening_name, COUNT(*) FROM games GROUP BY 1 ORDER BY 2 DESC LIMIT 5').df())"
+```
 
-## Notes on the design
+## Engineering Decisions
 
-- **Raw + flat split.** Keeping the raw JSON as its own table means the
-  transform step is idempotent. If I add a new column later I re-run
-  `transform.py` and don't have to re-fetch from the API.
-- **DuckDB over Postgres.** This is a personal dataset with 39 games and
-  growing. DuckDB gives me a single file, columnar performance, and no
-  server to manage.
-- **PGN parsing with python-chess.** The chess.com API only gives ECO in a
-  URL. Move count and termination are inside the PGN, and python-chess is
-  the standard library for reading it.
+**Raw + flat split.** I keep the original chess.com JSON in `raw_games` alongside the flat `games` table. If I want to extract a new column later (say, opening move sequence) I re-run `transform.py` without hitting the API again. This is the standard bronze/silver idea, scaled down to a personal project.
 
-## What I'd add next
+**DuckDB over SQLite or Postgres.** SQLite would work but DuckDB's columnar engine is faster for the aggregate queries I actually run, and it still ships as a single file with no server. Postgres would be overkill for one player's game history.
 
-- a scheduled GitHub Action to re-ingest weekly
-- accuracy vs opponent rating scatter (need more games first)
-- expected score based on rating gap, so I can see over/underperformance
+**Static HTML report over Streamlit.** GitHub Pages is free, has zero cold start, and the data only changes when I run the pipeline. A Streamlit app would need a hosted runtime for something the reader can already get from a static page.
+
+**python-chess for PGN parsing.** Regex over PGN is a rabbit hole. python-chess is the canonical library and handles the edge cases (comments, variations, glyphs) I do not want to think about.
+
+## Limitations & Future Improvements
+
+- Only one player is analyzed. The three scripts share a `USERNAME` constant instead of a config file
+- No scheduled refresh yet. Running as a nightly GitHub Action would keep the dashboard current
+- Opening groupings are noisy. "Four Knights Game" and "Four Knights Game Italian Variation" show up separately. Rolling up by ECO code prefix would help
+- Rating trend chart lumps all time controls together on one axis. Splitting by time class (rapid, blitz, bullet) would be a truer signal
+
+## License
+
+[MIT](LICENSE)
