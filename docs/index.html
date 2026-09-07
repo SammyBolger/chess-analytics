@@ -2,74 +2,218 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>BizareChess chess analytics</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BizareChess · chess analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #222; }
-  h1 { margin-bottom: 0.25rem; }
-  .subtitle { color: #666; margin-top: 0; }
-  .stats { display: flex; gap: 2rem; padding: 1rem 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
-  .stat { font-size: 0.9rem; color: #555; }
-  .stat b { display: block; font-size: 1.5rem; color: #111; }
-  img { max-width: 100%; margin: 1.5rem 0; border: 1px solid #eee; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; margin: 1rem 0; }
-  th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid #eee; }
-  th { background: #fafafa; }
-  footer { color: #888; font-size: 0.8rem; margin-top: 3rem; }
+  :root {
+    --bg: #f4ecd8;
+    --card: #fff9ec;
+    --ink: #2a1a0e;
+    --muted: #6b5b45;
+    --green: #6b8e4e;
+    --brown: #8b5a2b;
+    --red: #a04a3a;
+    --sand: #d8c8a8;
+    --cream: #eeeed2;
+    --moss: #769656;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+
+  /* hero */
+  .hero {
+    display: flex; align-items: center; gap: 1.25rem;
+    padding: 1.5rem 1.75rem;
+    background: var(--card);
+    border: 1px solid var(--sand);
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+  }
+  .king {
+    font-size: 3.75rem; line-height: 1;
+    color: var(--moss);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.06);
+    font-family: serif;
+  }
+  h1 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700;
+        font-size: 2.4rem; margin: 0; letter-spacing: -0.5px; }
+  .tagline { margin: 0.15rem 0 0; color: var(--muted); font-size: 0.95rem; }
+
+  /* stat grid */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem;
+    margin-bottom: 2rem;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--sand);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    text-align: left;
+  }
+  .stat .v { font-family: "Cormorant Garamond", Georgia, serif;
+              font-size: 2.1rem; font-weight: 700; color: var(--ink); line-height: 1; }
+  .stat .l { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em;
+              color: var(--muted); margin-top: 0.35rem; }
+
+  /* two-column grid for small tables */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  @media (max-width: 640px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .two { grid-template-columns: 1fr; }
+  }
+
+  /* sections */
+  h2 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--ink);
+    margin: 2.25rem 0 0.75rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--sand);
+  }
+  h2::before {
+    content: "♟ ";
+    color: var(--moss);
+    margin-right: 0.4rem;
+  }
+
+  /* tables */
+  .card { background: var(--card); border: 1px solid var(--sand); border-radius: 8px; padding: 1rem 1.1rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--sand); }
+  th { font-weight: 600; color: var(--muted); text-transform: uppercase;
+        font-size: 0.72rem; letter-spacing: 0.06em; }
+  tr:last-child td { border-bottom: none; }
+  .dim { color: var(--muted); }
+  .good { color: var(--green); font-weight: 600; }
+  .bad { color: var(--red); font-weight: 600; }
+  .result-w { color: var(--green); font-weight: 600; }
+  .result-l { color: var(--red); font-weight: 500; }
+  .result-d { color: var(--brown); font-weight: 500; }
+  .pill { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 10px;
+           font-size: 0.72rem; font-weight: 600; }
+  .pill-white { background: var(--cream); color: var(--ink); border: 1px solid var(--sand); }
+  .pill-black { background: var(--ink); color: var(--cream); }
+  a { color: var(--moss); }
+  a:hover { text-decoration: none; }
+
+  img.chart { display: block; width: 100%; margin: 0.5rem 0 0;
+               border: 1px solid var(--sand); border-radius: 6px; background: var(--card); }
+
+  footer { color: var(--muted); font-size: 0.82rem; margin-top: 3rem;
+            padding-top: 1rem; border-top: 1px solid var(--sand); }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<h1>BizareChess</h1>
-<p class="subtitle">chess.com analytics, auto-generated from my own games</p>
+  <header class="hero">
+    <div class="king">♔</div>
+    <div>
+      <h1>BizareChess</h1>
+      <p class="tagline">chess.com analytics · auto-generated from my games</p>
+    </div>
+  </header>
 
-<div class="stats">
-  <div class="stat"><b>48</b>games played</div>
-  <div class="stat"><b>15</b>wins</div>
-  <div class="stat"><b>29</b>losses</div>
-  <div class="stat"><b>35.4%</b>score</div>
+  <section class="stats">
+    <div class="stat"><div class="v">48</div><div class="l">games</div></div>
+    <div class="stat"><div class="v">15</div><div class="l">wins</div></div>
+    <div class="stat"><div class="v">29</div><div class="l">losses</div></div>
+    <div class="stat"><div class="v">35.4%</div><div class="l">score</div></div>
+  </section>
+
+  <div class="two">
+    <div class="card">
+      <h2 style="margin-top:0; border:none; padding:0; font-size:1.2rem;">By color</h2>
+      <table><tr><th>color</th><th>games</th><th>score</th></tr><tr><td>black</td><td>25</td><td>32.0%</td></tr>
+<tr><td>white</td><td>23</td><td>39.1%</td></tr></table>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0; border:none; padding:0; font-size:1.2rem;">By time control</h2>
+      <table><tr><th>class</th><th>games</th><th>score</th></tr><tr><td>rapid</td><td>39</td><td>35.9%</td></tr>
+<tr><td>blitz</td><td>5</td><td>20.0%</td></tr>
+<tr><td>bullet</td><td>4</td><td>50.0%</td></tr></table>
+    </div>
+  </div>
+
+  <h2>Rating over time</h2>
+  <img class="chart" src="rating_trend.png" alt="rating trend">
+
+  <h2>Form (rolling 5-game score)</h2>
+  <img class="chart" src="rolling_form.png" alt="rolling form">
+
+  <h2>How games ended</h2>
+  <img class="chart" src="termination.png" alt="termination breakdown">
+
+  <h2>Actual vs Elo-expected score</h2>
+  <p class="dim" style="font-size:0.88rem; margin-top:-0.25rem;">
+    Score % by opponent rating gap, next to the score Elo predicts. Positive delta means overperformance.
+  </p>
+  <img class="chart" src="perf_vs_gap.png" alt="performance vs rating gap">
+  <table>
+    <tr><th>rating gap</th><th>games</th><th>actual</th><th>expected</th><th>delta</th></tr>
+    <tr><td>much weaker (<=-100)</td><td>5</td><td>100.0%</td><td>69.3%</td><td class='good'>+30.7</td></tr>
+<tr><td>weaker (-99..-25)</td><td>8</td><td>87.5%</td><td>56.7%</td><td class='good'>+30.8</td></tr>
+<tr><td>similar (-24..24)</td><td>14</td><td>35.7%</td><td>50.0%</td><td class='bad'>-14.3</td></tr>
+<tr><td>stronger (25..99)</td><td>15</td><td>0.0%</td><td>42.2%</td><td class='bad'>-42.2</td></tr>
+<tr><td>much stronger (>=100)</td><td>6</td><td>0.0%</td><td>30.5%</td><td class='bad'>-30.5</td></tr>
+  </table>
+
+  <h2>Openings</h2>
+  <img class="chart" src="openings.png" alt="openings">
+  <table>
+    <tr><th>opening</th><th>games</th><th>score</th></tr>
+    <tr><td>Four Knights Game</td><td>5</td><td>40.0</td></tr>
+<tr><td>Vienna Game</td><td>4</td><td>25.0</td></tr>
+<tr><td>Italian Game Two Knights Modern Bishops Opening</td><td>4</td><td>0.0</td></tr>
+<tr><td>Van t Kruijs Opening 1...e5</td><td>3</td><td>66.7</td></tr>
+<tr><td>Kings Pawn Opening Kings Knight Variation 2...Nc6</td><td>2</td><td>100.0</td></tr>
+<tr><td>Scandinavian Defense Closed 2...dxe4 3.Nxe4</td><td>2</td><td>25.0</td></tr>
+<tr><td>Four Knights Game Italian Variation</td><td>2</td><td>0.0</td></tr>
+<tr><td>Three Knights Opening 3...Bc5</td><td>2</td><td>0.0</td></tr>
+  </table>
+
+  <h2>Most-played opponents</h2>
+  <table>
+    <tr><th>opponent</th><th>games</th><th>score</th><th>avg opp rating</th></tr>
+    <tr><td>WillSchess12</td><td>3</td><td>0.0%</td><td>905.0</td></tr>
+  </table>
+
+  <h2>Recent games</h2>
+  <table>
+    <tr><th>played</th><th>color</th><th>opponent</th><th>result</th><th>opening</th></tr>
+    <tr><td>2026-09-07 14:11</td><td class='pill pill-white'>white</td><td><a href='https://www.chess.com/game/live/174142462874' target='_blank'>SrSchuster</a> <span class='dim'>(677)</span></td><td class='result-w'>win</td><td class='dim'>French Defense Knight Variation Two Knights Variation 3...dxe4 4.Nxe4</td></tr>
+<tr><td>2026-09-07 14:10</td><td class='pill pill-black'>black</td><td><a href='https://www.chess.com/game/live/174142368300' target='_blank'>Bonzo232</a> <span class='dim'>(852)</span></td><td class='result-l'>timeout</td><td class='dim'>Kings Fianchetto Opening 1...e5 2.Bg2 Nf6</td></tr>
+<tr><td>2026-09-07 14:07</td><td class='pill pill-white'>white</td><td><a href='https://www.chess.com/game/live/174142220408' target='_blank'>RavDin</a> <span class='dim'>(632)</span></td><td class='result-w'>win</td><td class='dim'>Four Knights Game</td></tr>
+<tr><td>2026-09-07 14:05</td><td class='pill pill-black'>black</td><td><a href='https://www.chess.com/game/live/174142206112' target='_blank'>hamoopaia</a> <span class='dim'>(814)</span></td><td class='result-l'>checkmated</td><td class='dim'>Vienna Game Max Lange Defense 3.Bc4 Nf6</td></tr>
+<tr><td>2026-09-07 14:04</td><td class='pill pill-black'>black</td><td><a href='https://www.chess.com/game/live/174142067086' target='_blank'>Bamise6</a> <span class='dim'>(638)</span></td><td class='result-l'>resigned</td><td class='dim'>Italian Game Knight Attack Normal Variation 5.exd5</td></tr>
+<tr><td>2026-09-07 14:01</td><td class='pill pill-white'>white</td><td><a href='https://www.chess.com/game/live/174142044454' target='_blank'>lalo444888</a> <span class='dim'>(714)</span></td><td class='result-l'>resigned</td><td class='dim'>Vienna Game</td></tr>
+<tr><td>2026-09-07 14:00</td><td class='pill pill-white'>white</td><td><a href='https://www.chess.com/game/live/174141979840' target='_blank'>Srinivasa84</a> <span class='dim'>(747)</span></td><td class='result-l'>checkmated</td><td class='dim'>Vienna Game 2...d6</td></tr>
+<tr><td>2026-09-07 13:59</td><td class='pill pill-white'>white</td><td><a href='https://www.chess.com/game/live/174141867996' target='_blank'>aedonChess</a> <span class='dim'>(666)</span></td><td class='result-w'>win</td><td class='dim'>Caro Kann Defense Two Knights Attack...4.Nxe4 Nf6 5.Nxf6 gxf6</td></tr>
+<tr><td>2026-09-07 13:52</td><td class='pill pill-black'>black</td><td><a href='https://www.chess.com/game/live/174141293020' target='_blank'>faltah2003</a> <span class='dim'>(833)</span></td><td class='result-l'>resigned</td><td class='dim'>Queens Gambit Declined Marshall Defense</td></tr>
+<tr><td>2026-09-07 12:42</td><td class='pill pill-black'>black</td><td><a href='https://www.chess.com/game/live/174138109220' target='_blank'>ilTalpone</a> <span class='dim'>(819)</span></td><td class='result-l'>checkmated</td><td class='dim'>Queens Gambit Accepted 3.Nf3 Nf6 4.e3 e6 5.Bxc4</td></tr>
+<tr><td>2026-09-07 12:28</td><td class='pill pill-black'>black</td><td><a href='https://www.chess.com/game/live/174137945694' target='_blank'>Riya_Sarda27</a> <span class='dim'>(893)</span></td><td class='result-l'>resigned</td><td class='dim'>Four Knights Game</td></tr>
+<tr><td>2026-09-07 12:24</td><td class='pill pill-white'>white</td><td><a href='https://www.chess.com/game/live/174137496658' target='_blank'>sukaaamachaaa</a> <span class='dim'>(850)</span></td><td class='result-l'>checkmated</td><td class='dim'>Three Knights Opening 3...Bc5</td></tr>
+  </table>
+
+  <footer>
+    Data pulled from the chess.com public API. Last updated 2026-09-07 19:52 UTC.
+    Pipeline source · <a href="https://github.com/SammyBolger/chess-analytics">github.com/SammyBolger/chess-analytics</a>
+  </footer>
+
 </div>
-
-<h2>By color</h2>
-<ul><li>black: 25 games, 32.0%</li><li>white: 23 games, 39.1%</li></ul>
-
-<h2>Rating over time</h2>
-<img src="rating_trend.png" alt="rating trend">
-
-<h2>Score by opening</h2>
-<img src="openings.png" alt="score by opening">
-
-<h2>Top openings (2+ games)</h2>
-<table>
-<tr><th>opening</th><th>games</th><th>score</th></tr>
-<tr><td>Four Knights Game</td><td>5</td><td>40.0%</td></tr>
-<tr><td>Vienna Game</td><td>4</td><td>25.0%</td></tr>
-<tr><td>Italian Game Two Knights Modern Bishops Opening</td><td>4</td><td>0.0%</td></tr>
-<tr><td>Van t Kruijs Opening 1...e5</td><td>3</td><td>66.7%</td></tr>
-<tr><td>Kings Pawn Opening Kings Knight Variation 2...Nc6</td><td>2</td><td>100.0%</td></tr>
-<tr><td>Scandinavian Defense Closed 2...dxe4 3.Nxe4</td><td>2</td><td>25.0%</td></tr>
-<tr><td>Three Knights Opening 3...Bc5</td><td>2</td><td>0.0%</td></tr>
-<tr><td>Four Knights Game Italian Variation</td><td>2</td><td>0.0%</td></tr>
-</table>
-
-<h2>Recent games</h2>
-<table>
-<tr><th>date</th><th>color</th><th>opponent</th><th>result</th><th>opening</th></tr>
-<tr><td>2026-09-07</td><td>white</td><td>SrSchuster (677)</td><td>win</td><td>French Defense Knight Variation Two Knights Variation 3...dxe4 4.Nxe4</td></tr>
-<tr><td>2026-09-07</td><td>black</td><td>Bonzo232 (852)</td><td>timeout</td><td>Kings Fianchetto Opening 1...e5 2.Bg2 Nf6</td></tr>
-<tr><td>2026-09-07</td><td>white</td><td>RavDin (632)</td><td>win</td><td>Four Knights Game</td></tr>
-<tr><td>2026-09-07</td><td>black</td><td>hamoopaia (814)</td><td>checkmated</td><td>Vienna Game Max Lange Defense 3.Bc4 Nf6</td></tr>
-<tr><td>2026-09-07</td><td>black</td><td>Bamise6 (638)</td><td>resigned</td><td>Italian Game Knight Attack Normal Variation 5.exd5</td></tr>
-<tr><td>2026-09-07</td><td>white</td><td>lalo444888 (714)</td><td>resigned</td><td>Vienna Game</td></tr>
-<tr><td>2026-09-07</td><td>white</td><td>Srinivasa84 (747)</td><td>checkmated</td><td>Vienna Game 2...d6</td></tr>
-<tr><td>2026-09-07</td><td>white</td><td>aedonChess (666)</td><td>win</td><td>Caro Kann Defense Two Knights Attack...4.Nxe4 Nf6 5.Nxf6 gxf6</td></tr>
-<tr><td>2026-09-07</td><td>black</td><td>faltah2003 (833)</td><td>resigned</td><td>Queens Gambit Declined Marshall Defense</td></tr>
-<tr><td>2026-09-07</td><td>black</td><td>ilTalpone (819)</td><td>checkmated</td><td>Queens Gambit Accepted 3.Nf3 Nf6 4.e3 e6 5.Bxc4</td></tr>
-</table>
-
-<footer>
-Data pulled from the chess.com public API. Last updated 2026-09-07.
-Source: <a href="https://github.com/SammyBolger/chess-analytics">github.com/SammyBolger/chess-analytics</a>
-</footer>
-
 </body>
 </html>
