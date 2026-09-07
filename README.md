@@ -1,6 +1,6 @@
 # chess-analytics
 
-*A tiny ELT pipeline that pulls my chess.com games, loads them into DuckDB, and publishes a dashboard.*
+*A small ELT pipeline that pulls my chess.com games, loads them into DuckDB, and publishes a dashboard.*
 
 [![Live report](https://img.shields.io/badge/live-report-blue)](https://sammybolger.github.io/chess-analytics/)
 [![License](https://img.shields.io/github/license/SammyBolger/chess-analytics)](LICENSE)
