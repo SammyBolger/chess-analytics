@@ -31,7 +31,7 @@ Live at https://sammybolger.github.io/chess-analytics/
 - **Python 3.11** — one runtime for all three steps
 - **DuckDB** — single-file columnar store, no server. Fits a personal dataset without any Postgres overhead
 - **python-chess** — parses PGN reliably. Move count and termination live inside the PGN body, not the JSON metadata
-- **matplotlib** — static chart rendering. PNGs go straight into `docs/` for GitHub Pages
+- **Plotly** — every chart is an interactive Plotly div inlined into `docs/index.html`. Hover tooltips, zoom, pan. Plotly.js loads once from CDN
 - **requests** — chess.com public API client, one endpoint per month
 
 ## Architecture
