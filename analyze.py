@@ -764,11 +764,25 @@ def main() -> None:
     html = render_html(ctx, divs)
     (DOCS_DIR / "index.html").write_text(html)
 
-    # remove the old matplotlib PNGs since the report is now fully interactive
-    for stale in DOCS_DIR.glob("*.png"):
-        stale.unlink()
+    # regenerate the README preview image from the rating chart so it stays in sync
+    write_preview(full)
 
     print(f"interactive dashboard written to {DOCS_DIR}/index.html")
+
+
+def write_preview(full: pd.DataFrame) -> None:
+    """Render a static PNG snapshot of the rating chart for the README hero."""
+    fig = fig_rating(full)
+    fig.update_layout(
+        height=460, width=1200, **PLOTLY_LAYOUT,
+        title=dict(text="Sammy Bolger Chess Analytics · Rating over time",
+                   x=0.02, font=dict(size=20)),
+    )
+    try:
+        fig.write_image(str(DOCS_DIR / "preview.png"), scale=2)
+    except Exception as e:
+        # kaleido can fail on fresh environments. Log but don't kill the build.
+        print(f"skipped preview.png ({e})")
 
 
 if __name__ == "__main__":

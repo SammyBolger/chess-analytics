@@ -23,9 +23,9 @@ An end-to-end ELT job in three scripts. Ingest hits the chess.com public API, tr
 
 ## Demo
 
-**Live dashboard:** https://sammybolger.github.io/chess-analytics/
+[![dashboard preview](docs/preview.png)](https://sammybolger.github.io/chess-analytics/)
 
-Every chart supports hover tooltips, drag-to-zoom, and double-click to reset. The colored dots on the by-time-control table map each series in the rating chart to its color.
+Every chart on the live site supports hover tooltips, drag-to-zoom, and double-click to reset. The colored dots on the by-time-control table map each series in the rating chart to its color.
 
 ## Tech Stack
 
