@@ -1,0 +1,5 @@
+requests>=2.31
+duckdb>=1.0
+python-chess>=1.999
+pandas>=2.0
+matplotlib>=3.7
