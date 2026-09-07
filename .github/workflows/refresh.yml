@@ -4,7 +4,7 @@ name: refresh chess dashboard
 # also exposes workflow_dispatch so I can trigger a manual refresh from the UI
 on:
   schedule:
-    - cron: "*/30 * * * *"   # every 30 minutes
+    - cron: "0 6 * * *"   # once a day at 06:00 UTC (~2am ET / 11pm PT the night before)
   workflow_dispatch:
 
 permissions:
