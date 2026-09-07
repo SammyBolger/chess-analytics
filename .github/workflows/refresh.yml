@@ -1,0 +1,46 @@
+name: refresh chess dashboard
+
+# runs the pipeline on a schedule so the GH Pages report stays current
+# also exposes workflow_dispatch so I can trigger a manual refresh from the UI
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # every 30 minutes
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: install deps
+        run: pip install -r requirements.txt
+
+      - name: ingest
+        run: python ingest.py
+
+      - name: transform
+        run: python transform.py
+
+      - name: analyze
+        run: python analyze.py
+
+      - name: commit updated report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          if git diff --staged --quiet; then
+            echo "no changes to publish"
+          else
+            git commit -m "refresh dashboard $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
