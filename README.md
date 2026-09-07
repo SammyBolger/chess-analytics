@@ -7,7 +7,7 @@
 
 I wanted a repeatable way to look at my openings and results without clicking through chess.com. This project pulls every game I've played, loads it into DuckDB, and writes an interactive HTML dashboard that GitHub Pages serves. A GitHub Action re-runs the pipeline daily so the dashboard stays current.
 
-**Live report:** https://sammybolger.github.io/chess-analytics/
+**Live Dashboard:** https://sammybolger.github.io/chess-analytics/
 
 ## Overview
 
